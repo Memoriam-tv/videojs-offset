@@ -77,8 +77,7 @@ const offset = function(options) {
       __offsetInit: true,
       duration: Player.prototype.duration,
       currentTime: Player.prototype.currentTime,
-      bufferedPercent: Player.prototype.bufferedPercent,
-      remainingTime: Player.prototype.remainingTime
+      bufferedPercent: Player.prototype.bufferedPercent
     };
 
     Player.prototype.duration = function() {
@@ -95,15 +94,6 @@ const offset = function(options) {
       }
       return Player.__super__.currentTime
         .apply(this, arguments) - this._offsetStart;
-    };
-
-    Player.prototype.remainingTime = function() {
-      let curr = this.currentTime();
-
-      if (curr < this._offsetStart) {
-        curr = 0;
-      }
-      return this.duration() - curr;
     };
 
     Player.prototype.startOffset = function() {

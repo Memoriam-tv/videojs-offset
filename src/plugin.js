@@ -73,12 +73,13 @@ const offset = function(options) {
   this._restartBeginning = options.restart_beginning || false;
 
   if (!Player.__super__ || !Player.__super__.__offsetInit) {
-    Player.__super__ = {
+    Player.__super__ = Player.__super__ || {};
+    Player.__super__ = Object.assign(Player.__super__, {
       __offsetInit: true,
       duration: Player.prototype.duration,
       currentTime: Player.prototype.currentTime,
       bufferedPercent: Player.prototype.bufferedPercent
-    };
+    });
 
     Player.prototype.duration = function() {
       if (this._offsetEnd > 0) {
@@ -108,9 +109,19 @@ const offset = function(options) {
     };
   }
 
+  this.disposeOffset = () => {
+    Player.prototype.duration = Player.__super__.duration;
+    Player.prototype.currentTime = Player.__super__.currentTime;
+    Player.prototype.bufferedPercent = Player.__super__.bufferedPercent;
+
+    Player.__supper__.__offsetInit = false;
+  };
+
   this.ready(() => {
     onPlayerReady(this, videojs.mergeOptions(defaults, options));
   });
+
+  this.one('dispose', disposeOffset);
 };
 
 // Register the plugin with video.js.

@@ -1,6 +1,6 @@
 /**
  * videojs-offset
- * @version 2.0.0-beta.1
+ * @version 2.0.0-beta.3
  * @copyright 2017 Carles Galan Cladera <cgcladera@gmail.com>
  * @license MIT
  */
@@ -11,6 +11,8 @@
 }(this, (function (videojs) { 'use strict';
 
 videojs = 'default' in videojs ? videojs['default'] : videojs;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 // Default options for the plugin.
 var defaults = {};
@@ -87,12 +89,13 @@ var offset = function offset(options) {
   this._restartBeginning = options.restart_beginning || false;
 
   if (!Player.__super__ || !Player.__super__.__offsetInit) {
-    Player.__super__ = {
+    Player.__super__ = Player.__super__ || {};
+    Player.__super__ = _extends(Player.__super__, {
       __offsetInit: true,
       duration: Player.prototype.duration,
       currentTime: Player.prototype.currentTime,
       bufferedPercent: Player.prototype.bufferedPercent
-    };
+    });
 
     Player.prototype.duration = function () {
       if (this._offsetEnd > 0) {
@@ -120,9 +123,19 @@ var offset = function offset(options) {
     };
   }
 
+  this.disposeOffset = function () {
+    Player.prototype.duration = Player.__super__.duration;
+    Player.prototype.currentTime = Player.__super__.currentTime;
+    Player.prototype.bufferedPercent = Player.__super__.bufferedPercent;
+
+    Player.__supper__.__offsetInit = false;
+  };
+
   this.ready(function () {
     onPlayerReady(_this, videojs.mergeOptions(defaults, options));
   });
+
+  this.one('dispose', disposeOffset);
 };
 
 // Register the plugin with video.js.

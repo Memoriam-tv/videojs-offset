@@ -114,7 +114,9 @@ const offset = function(options) {
     Player.prototype.currentTime = Player.__super__.currentTime;
     Player.prototype.bufferedPercent = Player.__super__.bufferedPercent;
 
-    Player.__supper__.__offsetInit = false;
+    this.off('timeupdate', onPlayerTimeUpdate);
+
+    Player.__super__.__offsetInit = false;
   };
 
   this.ready(() => {

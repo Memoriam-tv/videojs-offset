@@ -135,7 +135,7 @@ var offset = function offset(options) {
     onPlayerReady(_this, videojs.mergeOptions(defaults, options));
   });
 
-  this.one('dispose', disposeOffset);
+  this.one('dispose', this.disposeOffset);
 };
 
 // Register the plugin with video.js.

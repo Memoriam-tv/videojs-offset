@@ -61,9 +61,10 @@ var onPlayerTimeUpdate = function onPlayerTimeUpdate() {
  *           An object of options left to the plugin author to define.
  */
 var onPlayerReady = function onPlayerReady(player, options) {
-  player.one('play', function () {
-    player.on('timeupdate', onPlayerTimeUpdate);
-  });
+  // Bind this handler right away after player ready,
+  // when live videos are in autoplay videojs 5
+  // does not trigger play event at the beginning
+  player.on('timeupdate', onPlayerTimeUpdate);
 };
 
 /**
@@ -84,8 +85,8 @@ var offset = function offset(options) {
   options = options || {};
   var Player = this.constructor;
 
-  this._offsetStart = options.start || 0;
-  this._offsetEnd = options.end || 0;
+  this._offsetStart = parseFloat(options.start) || 0;
+  this._offsetEnd = parseFloat(options.end) || 0;
   this._restartBeginning = options.restart_beginning || false;
 
   if (!Player.__super__ || !Player.__super__.__offsetInit) {

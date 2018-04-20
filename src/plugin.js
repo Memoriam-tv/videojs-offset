@@ -47,9 +47,10 @@ const onPlayerTimeUpdate = function() {
  *           An object of options left to the plugin author to define.
  */
 const onPlayerReady = (player, options) => {
-  player.one('play', () => {
-    player.on('timeupdate', onPlayerTimeUpdate);
-  });
+  // Bind this handler right away after player ready,
+  // when live videos are in autoplay videojs 5
+  // does not trigger play event at the beginning
+  player.on('timeupdate', onPlayerTimeUpdate);
 };
 
 /**

@@ -1,6 +1,6 @@
 /**
  * videojs-offset
- * @version 2.0.0-beta.4
+ * @version 2.0.0-beta.5
  * @copyright 2018 Carles Galan Cladera <cgcladera@gmail.com>
  * @license MIT
  */
@@ -35,7 +35,6 @@ var onPlayerTimeUpdate = function onPlayerTimeUpdate() {
     this.play();
   }
   if (this._offsetEnd > 0 && curr > this._offsetEnd - this._offsetStart) {
-    this.off('timeupdate', onPlayerTimeUpdate);
     this.pause();
     this.trigger('ended');
 

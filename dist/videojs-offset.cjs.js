@@ -40,12 +40,12 @@ var onPlayerTimeUpdate = function onPlayerTimeUpdate() {
   }
   if (this._offsetEnd > 0 && curr > this._offsetEnd - this._offsetStart) {
     this.pause();
-    this.trigger('ended');
+    this.trigger("ended");
 
     if (!this._restartBeginning) {
       this.currentTime(this._offsetEnd - this._offsetStart);
     } else {
-      this.trigger('loadstart');
+      this.trigger("loadstart");
       this.currentTime(0);
     }
   }
@@ -67,7 +67,7 @@ var onPlayerReady = function onPlayerReady(player, options) {
   // Bind this handler right away after player ready,
   // when live videos are in autoplay videojs 5
   // does not trigger play event at the beginning
-  player.on('timeupdate', onPlayerTimeUpdate);
+  player.on("timeupdate", onPlayerTimeUpdate);
 };
 
 /**
@@ -101,25 +101,25 @@ var offset = function offset(options) {
       bufferedPercent: Player.prototype.bufferedPercent
     });
 
-    Player.prototype.duration = function () {
+    this.duration = function () {
       if (this._offsetEnd > 0) {
         return this._offsetEnd - this._offsetStart;
       }
       return Player.__super__.duration.apply(this, arguments) - this._offsetStart;
     };
 
-    Player.prototype.currentTime = function (seconds) {
+    this.currentTime = function (seconds) {
       if (seconds !== undefined) {
         return Player.__super__.currentTime.call(this, seconds + this._offsetStart) - this._offsetStart;
       }
       return Player.__super__.currentTime.apply(this, arguments) - this._offsetStart;
     };
 
-    Player.prototype.startOffset = function () {
+    this.startOffset = function () {
       return this._offsetStart;
     };
 
-    Player.prototype.endOffset = function () {
+    this.endOffset = function () {
       if (this._offsetEnd > 0) {
         return this._offsetEnd;
       }
@@ -132,7 +132,7 @@ var offset = function offset(options) {
     Player.prototype.currentTime = Player.__super__.currentTime;
     Player.prototype.bufferedPercent = Player.__super__.bufferedPercent;
 
-    _this.off('timeupdate', onPlayerTimeUpdate);
+    _this.off("timeupdate", onPlayerTimeUpdate);
 
     Player.__super__.__offsetInit = false;
   };
@@ -141,12 +141,12 @@ var offset = function offset(options) {
     onPlayerReady(_this, videojs.mergeOptions(defaults$$1, options));
   });
 
-  this.one('dispose', this.disposeOffset);
+  this.one("dispose", this.disposeOffset);
 };
 
 // Register the plugin with video.js.
-registerPlugin('offset', offset);
+registerPlugin("offset", offset);
 // Include the version number.
-offset.VERSION = '__VERSION__';
+offset.VERSION = "__VERSION__";
 
 module.exports = offset;

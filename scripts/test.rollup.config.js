@@ -11,19 +11,14 @@ import resolve from 'rollup-plugin-node-resolve';
 
 export default {
   moduleName: 'videojsOffsetTests',
-  entry: 'test/**/*.test.js',
+  entry: 'test/plugin.test.js',
   dest: 'test/dist/bundle.js',
   format: 'iife',
-  external: [
-    'qunit',
-    'qunitjs',
-    'sinon',
-    'video.js'
-  ],
+  external: ['qunit', 'qunitjs', 'sinon', 'video.js'],
   globals: {
-    'qunit': 'QUnit',
-    'qunitjs': 'QUnit',
-    'sinon': 'sinon',
+    qunit: 'QUnit',
+    qunitjs: 'QUnit',
+    sinon: 'sinon',
     'video.js': 'videojs'
   },
   legacy: true,
@@ -45,15 +40,15 @@ export default {
       exclude: 'node_modules/**',
       presets: [
         'es3',
-        ['es2015', {
-          loose: true,
-          modules: false
-        }]
+        [
+          'es2015',
+          {
+            loose: true,
+            modules: false
+          }
+        ]
       ],
-      plugins: [
-        'external-helpers',
-        'transform-object-assign'
-      ]
+      plugins: ['external-helpers', 'transform-object-assign']
     })
   ]
 };

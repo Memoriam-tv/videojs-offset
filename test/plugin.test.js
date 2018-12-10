@@ -16,9 +16,7 @@ QUnit.test('the environment is sane', function(assert) {
 });
 
 QUnit.module('videojs-offset', {
-
   beforeEach() {
-
     // Mock the environment's timers because certain things - particularly
     // player readiness - are asynchronous in video.js 5. This MUST come
     // before any player is created; otherwise, timers could get created

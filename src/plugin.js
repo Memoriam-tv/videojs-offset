@@ -20,7 +20,7 @@ const onPlayerTimeUpdate = function() {
     this.currentTime(0);
     this.play();
   }
-  if (this._offsetEnd > 0 && curr > (this._offsetEnd - this._offsetStart)) {
+  if (this._offsetEnd > 0 && curr > this._offsetEnd - this._offsetStart) {
     this.pause();
     this.trigger('ended');
 
@@ -81,27 +81,32 @@ const offset = function(options) {
       bufferedPercent: Player.prototype.bufferedPercent
     });
 
-    Player.prototype.duration = function() {
+    this.duration = function() {
       if (this._offsetEnd > 0) {
         return this._offsetEnd - this._offsetStart;
       }
-      return Player.__super__.duration.apply(this, arguments) - this._offsetStart;
+      return (
+        Player.__super__.duration.apply(this, arguments) - this._offsetStart
+      );
     };
 
-    Player.prototype.currentTime = function(seconds) {
+    this.currentTime = function(seconds) {
       if (seconds !== undefined) {
-        return Player.__super__.currentTime
-          .call(this, seconds + this._offsetStart) - this._offsetStart;
+        return (
+          Player.__super__.currentTime.call(this, seconds + this._offsetStart) -
+          this._offsetStart
+        );
       }
-      return Player.__super__.currentTime
-        .apply(this, arguments) - this._offsetStart;
+      return (
+        Player.__super__.currentTime.apply(this, arguments) - this._offsetStart
+      );
     };
 
-    Player.prototype.startOffset = function() {
+    this.startOffset = function() {
       return this._offsetStart;
     };
 
-    Player.prototype.endOffset = function() {
+    this.endOffset = function() {
       if (this._offsetEnd > 0) {
         return this._offsetEnd;
       }

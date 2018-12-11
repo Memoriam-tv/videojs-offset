@@ -72,56 +72,38 @@ const offset = function(options) {
   this._offsetEnd = parseFloat(options.end) || 0;
   this._restartBeginning = options.restart_beginning || false;
 
-  if (!Player.__super__ || !Player.__super__.__offsetInit) {
-    Player.__super__ = Player.__super__ || {};
-    Player.__super__ = Object.assign(Player.__super__, {
-      __offsetInit: true,
-      duration: Player.prototype.duration,
-      currentTime: Player.prototype.currentTime,
-      bufferedPercent: Player.prototype.bufferedPercent
-    });
+  this.duration = function() {
+    if (this._offsetEnd > 0) {
+      return this._offsetEnd - this._offsetStart;
+    }
+    return Player.prototype.duration.apply(this, arguments) - this._offsetStart;
+  };
 
-    this.duration = function() {
-      if (this._offsetEnd > 0) {
-        return this._offsetEnd - this._offsetStart;
-      }
+  this.currentTime = function(seconds) {
+    if (seconds !== undefined) {
       return (
-        Player.__super__.duration.apply(this, arguments) - this._offsetStart
+        Player.prototype.currentTime.call(this, seconds + this._offsetStart) -
+        this._offsetStart
       );
-    };
+    }
+    return (
+      Player.prototype.currentTime.apply(this, arguments) - this._offsetStart
+    );
+  };
 
-    this.currentTime = function(seconds) {
-      if (seconds !== undefined) {
-        return (
-          Player.__super__.currentTime.call(this, seconds + this._offsetStart) -
-          this._offsetStart
-        );
-      }
-      return (
-        Player.__super__.currentTime.apply(this, arguments) - this._offsetStart
-      );
-    };
+  this.startOffset = function() {
+    return this._offsetStart;
+  };
 
-    this.startOffset = function() {
-      return this._offsetStart;
-    };
-
-    this.endOffset = function() {
-      if (this._offsetEnd > 0) {
-        return this._offsetEnd;
-      }
-      return this.duration();
-    };
-  }
+  this.endOffset = function() {
+    if (this._offsetEnd > 0) {
+      return this._offsetEnd;
+    }
+    return this.duration();
+  };
 
   this.disposeOffset = () => {
-    Player.prototype.duration = Player.__super__.duration;
-    Player.prototype.currentTime = Player.__super__.currentTime;
-    Player.prototype.bufferedPercent = Player.__super__.bufferedPercent;
-
     this.off('timeupdate', onPlayerTimeUpdate);
-
-    Player.__super__.__offsetInit = false;
   };
 
   this.ready(() => {

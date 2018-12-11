@@ -4,22 +4,8 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var videojs = _interopDefault(require('video.js'));
 
-var _extends = Object.assign || function (target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i];
-
-    for (var key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        target[key] = source[key];
-      }
-    }
-  }
-
-  return target;
-};
-
 // Default options for the plugin.
-var defaults$$1 = {};
+var defaults = {};
 
 // Cross-compatibility for Video.js 5 and 6.
 var registerPlugin = videojs.registerPlugin || videojs.plugin;
@@ -40,12 +26,12 @@ var onPlayerTimeUpdate = function onPlayerTimeUpdate() {
   }
   if (this._offsetEnd > 0 && curr > this._offsetEnd - this._offsetStart) {
     this.pause();
-    this.trigger("ended");
+    this.trigger('ended');
 
     if (!this._restartBeginning) {
       this.currentTime(this._offsetEnd - this._offsetStart);
     } else {
-      this.trigger("loadstart");
+      this.trigger('loadstart');
       this.currentTime(0);
     }
   }
@@ -67,7 +53,7 @@ var onPlayerReady = function onPlayerReady(player, options) {
   // Bind this handler right away after player ready,
   // when live videos are in autoplay videojs 5
   // does not trigger play event at the beginning
-  player.on("timeupdate", onPlayerTimeUpdate);
+  player.on('timeupdate', onPlayerTimeUpdate);
 };
 
 /**
@@ -92,61 +78,45 @@ var offset = function offset(options) {
   this._offsetEnd = parseFloat(options.end) || 0;
   this._restartBeginning = options.restart_beginning || false;
 
-  if (!Player.__super__ || !Player.__super__.__offsetInit) {
-    Player.__super__ = Player.__super__ || {};
-    Player.__super__ = _extends(Player.__super__, {
-      __offsetInit: true,
-      duration: Player.prototype.duration,
-      currentTime: Player.prototype.currentTime,
-      bufferedPercent: Player.prototype.bufferedPercent
-    });
+  this.duration = function () {
+    if (this._offsetEnd > 0) {
+      return this._offsetEnd - this._offsetStart;
+    }
+    return Player.prototype.duration.apply(this, arguments) - this._offsetStart;
+  };
 
-    this.duration = function () {
-      if (this._offsetEnd > 0) {
-        return this._offsetEnd - this._offsetStart;
-      }
-      return Player.__super__.duration.apply(this, arguments) - this._offsetStart;
-    };
+  this.currentTime = function (seconds) {
+    if (seconds !== undefined) {
+      return Player.prototype.currentTime.call(this, seconds + this._offsetStart) - this._offsetStart;
+    }
+    return Player.prototype.currentTime.apply(this, arguments) - this._offsetStart;
+  };
 
-    this.currentTime = function (seconds) {
-      if (seconds !== undefined) {
-        return Player.__super__.currentTime.call(this, seconds + this._offsetStart) - this._offsetStart;
-      }
-      return Player.__super__.currentTime.apply(this, arguments) - this._offsetStart;
-    };
+  this.startOffset = function () {
+    return this._offsetStart;
+  };
 
-    this.startOffset = function () {
-      return this._offsetStart;
-    };
-
-    this.endOffset = function () {
-      if (this._offsetEnd > 0) {
-        return this._offsetEnd;
-      }
-      return this.duration();
-    };
-  }
+  this.endOffset = function () {
+    if (this._offsetEnd > 0) {
+      return this._offsetEnd;
+    }
+    return this.duration();
+  };
 
   this.disposeOffset = function () {
-    Player.prototype.duration = Player.__super__.duration;
-    Player.prototype.currentTime = Player.__super__.currentTime;
-    Player.prototype.bufferedPercent = Player.__super__.bufferedPercent;
-
-    _this.off("timeupdate", onPlayerTimeUpdate);
-
-    Player.__super__.__offsetInit = false;
+    _this.off('timeupdate', onPlayerTimeUpdate);
   };
 
   this.ready(function () {
-    onPlayerReady(_this, videojs.mergeOptions(defaults$$1, options));
+    onPlayerReady(_this, videojs.mergeOptions(defaults, options));
   });
 
-  this.one("dispose", this.disposeOffset);
+  this.one('dispose', this.disposeOffset);
 };
 
 // Register the plugin with video.js.
-registerPlugin("offset", offset);
+registerPlugin('offset', offset);
 // Include the version number.
-offset.VERSION = "__VERSION__";
+offset.VERSION = '__VERSION__';
 
 module.exports = offset;

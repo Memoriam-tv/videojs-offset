@@ -1,6 +1,6 @@
 /**
  * videojs-offset
- * @version 2.0.0-beta.5
+ * @version 2.1.0
  * @copyright 2018 Carles Galan Cladera <cgcladera@gmail.com>
  * @license MIT
  */

@@ -1,6 +1,6 @@
 {
   "name": "videojs-offset",
-  "version": "2.0.0-beta.5",
+  "version": "2.1.0",
   "description": "VideoJs plugin to virtually \"cut\" an ondemand video",
   "main": "dist/videojs-offset.cjs.js",
   "jsnext:main": "src/js/index.js",
@@ -64,7 +64,7 @@
   ],
   "dependencies": {
     "global": "^4.3.2",
-    "video.js": "^5.20.5"
+    "video.js": "^7.3.0"
   },
   "devDependencies": {
     "babel-plugin-external-helpers": "^6.22.0",

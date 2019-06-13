@@ -1,4 +1,5 @@
-import videojs from 'video.js';
+import videojs from "video.js";
+import { version as VERSION } from "../package.json";
 
 // Default options for the plugin.
 const defaults = {};
@@ -22,12 +23,17 @@ const onPlayerTimeUpdate = function() {
   }
   if (this._offsetEnd > 0 && curr > this._offsetEnd - this._offsetStart) {
     this.pause();
-    this.trigger('ended');
+    this.trigger("ended");
+
+    // Re-bind to timeupdate next time the video plays
+    this.one("play", () => {
+      this.on("timeupdate", onPlayerTimeUpdate);
+    });
 
     if (!this._restartBeginning) {
       this.currentTime(this._offsetEnd - this._offsetStart);
     } else {
-      this.trigger('loadstart');
+      this.trigger("loadstart");
       this.currentTime(0);
     }
   }
@@ -49,7 +55,7 @@ const onPlayerReady = (player, options) => {
   // Bind this handler right away after player ready,
   // when live videos are in autoplay videojs 5
   // does not trigger play event at the beginning
-  player.on('timeupdate', onPlayerTimeUpdate);
+  player.on("timeupdate", onPlayerTimeUpdate);
 };
 
 /**
@@ -68,15 +74,20 @@ const offset = function(options) {
   options = options || {};
   const Player = this.constructor;
 
-  this._offsetStart = parseFloat(options.start) || 0;
-  this._offsetEnd = parseFloat(options.end) || 0;
+  this._offsetStart = parseFloat(options.start || "0");
+  this._offsetEnd = parseFloat(options.end || "0");
   this._restartBeginning = options.restart_beginning || false;
 
   this.duration = function() {
-    if (this._offsetEnd > 0) {
-      return this._offsetEnd - this._offsetStart;
+    if (this._offsetEnd !== undefined && this._offsetStart !== undefined) {
+      if (this._offsetEnd > 0) {
+        return this._offsetEnd - this._offsetStart;
+      }
+      return (
+        Player.prototype.duration.apply(this, arguments) - this._offsetStart
+      );
     }
-    return Player.prototype.duration.apply(this, arguments) - this._offsetStart;
+    return Player.prototype.duration.apply(this, arguments);
   };
 
   this.currentTime = function(seconds) {
@@ -91,6 +102,27 @@ const offset = function(options) {
     );
   };
 
+  this.currentTime = function(seconds) {
+    if (seconds !== undefined) {
+      if (this._offsetStart !== undefined) {
+        return Player.prototype.currentTime.call(
+          this,
+          seconds + this._offsetStart
+        );
+      }
+      return Player.prototype.currentTime.call(this, seconds);
+    }
+
+    if (this._offsetStart !== undefined) {
+      return Player.prototype.currentTime.apply(this) - this._offsetStart;
+    }
+    return Player.prototype.currentTime.apply(this);
+  };
+
+  this.remainingTime = function() {
+    return this.duration() - this.currentTime();
+  };
+
   this.startOffset = function() {
     return this._offsetStart;
   };
@@ -102,20 +134,34 @@ const offset = function(options) {
     return this.duration();
   };
 
+  this.buffered = function() {
+    const buff = Player.prototype.buffered.call(this);
+    const ranges = [];
+
+    for (let i = 0; i < buff.length; i++) {
+      ranges[i] = [
+        Math.max(0, buff.start(i) - this._offsetStart),
+        Math.min(Math.max(0, buff.end(i) - this._offsetStart), this.duration())
+      ];
+    }
+
+    return videojs.createTimeRanges(ranges);
+  };
+
   this.disposeOffset = () => {
-    this.off('timeupdate', onPlayerTimeUpdate);
+    this.off("timeupdate", onPlayerTimeUpdate);
   };
 
   this.ready(() => {
     onPlayerReady(this, videojs.mergeOptions(defaults, options));
   });
 
-  this.one('dispose', this.disposeOffset);
+  this.one("dispose", this.disposeOffset);
 };
 
 // Register the plugin with video.js.
-registerPlugin('offset', offset);
+registerPlugin("offset", offset);
 // Include the version number.
-offset.VERSION = '__VERSION__';
+offset.VERSION = VERSION;
 
 export default offset;

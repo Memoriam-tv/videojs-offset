@@ -1,11 +1,11 @@
-/*! @name videojs-offset @version 2.1.2 @license MIT */
+/*! @name videojs-offset @version 2.2.1 @license MIT */
 'use strict';
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var videojs = _interopDefault(require('video.js'));
 
-var version = "2.1.2";
+var version = "2.2.1";
 
 // Using a bigger version of Episilon than Number.Epsilon
 // since the function is meant to be used for comparing
@@ -35,22 +35,18 @@ var onPlayerTimeUpdate = function onPlayerTimeUpdate() {
   }
 
   if (curr < 0) {
-    this.currentTime(0); // this.play();
+    this.currentTime(0);
   }
 
   if (this._offsetEnd > 0 && curr > this._offsetEnd - this._offsetStart) {
-    // this.pause();
-    this.trigger('ended'); // Re-bind to timeupdate next time the video plays
-    // this.one('play', () => {
-    //   this.on('timeupdate', onPlayerTimeUpdate);
-    // });
+    this.trigger('ended');
 
     if (!this._restartBeginning) {
       this.currentTime(this._offsetEnd - this._offsetStart);
       this.pause();
     } else {
       this.trigger('loadstart');
-      this.currentTime(0); // this.play();
+      this.currentTime(0);
     }
   }
 };
@@ -161,6 +157,12 @@ var offset = function offset(options) {
     onPlayerReady(_this, videojs.mergeOptions(defaults, options));
   });
   this.one('dispose', this.disposeOffset);
+
+  this.setOffset = function (start, end) {
+    this._offsetStart = parseFloat(start || '0');
+    this._offsetEnd = parseFloat(end || '0');
+    this.trigger('timeupdate');
+  };
 }; // Register the plugin with video.js.
 
 

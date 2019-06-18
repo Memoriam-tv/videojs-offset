@@ -145,6 +145,13 @@ const offset = function(options) {
   });
 
   this.one('dispose', this.disposeOffset);
+
+  this.setOffset = function(start, end) {
+    this._offsetStart = parseFloat(start || '0');
+    this._offsetEnd = parseFloat(end || '0');
+
+    this.trigger('timeupdate');
+  };
 };
 
 // Register the plugin with video.js.

@@ -3,6 +3,15 @@ import videojs from 'video.js';
 
 var version = "2.1.2";
 
+// Using a bigger version of Episilon than Number.Epsilon
+// since the function is meant to be used for comparing
+// currentTime in videos
+var Epsilon = 0.0001;
+var timeAlmostEqual = function timeAlmostEqual(num1, num2) {
+  var almost = Math.abs(num1 - num2) < Epsilon;
+  return almost;
+};
+
 var defaults = {}; // Cross-compatibility for Video.js 5 and 6.
 
 var registerPlugin = videojs.registerPlugin || videojs.plugin; // const dom = videojs.dom || videojs;
@@ -15,28 +24,29 @@ var registerPlugin = videojs.registerPlugin || videojs.plugin; // const dom = vi
  */
 
 var onPlayerTimeUpdate = function onPlayerTimeUpdate() {
-  var _this = this;
-
   var curr = this.currentTime();
 
+  if (timeAlmostEqual(curr, 0)) {
+    return;
+  }
+
   if (curr < 0) {
-    this.currentTime(0);
-    this.play();
+    this.currentTime(0); // this.play();
   }
 
   if (this._offsetEnd > 0 && curr > this._offsetEnd - this._offsetStart) {
-    this.pause();
+    // this.pause();
     this.trigger('ended'); // Re-bind to timeupdate next time the video plays
-
-    this.one('play', function () {
-      _this.on('timeupdate', onPlayerTimeUpdate);
-    });
+    // this.one('play', () => {
+    //   this.on('timeupdate', onPlayerTimeUpdate);
+    // });
 
     if (!this._restartBeginning) {
       this.currentTime(this._offsetEnd - this._offsetStart);
+      this.pause();
     } else {
       this.trigger('loadstart');
-      this.currentTime(0);
+      this.currentTime(0); // this.play();
     }
   }
 };
@@ -76,7 +86,7 @@ var onPlayerReady = function onPlayerReady(player, options) {
 
 
 var offset = function offset(options) {
-  var _this2 = this;
+  var _this = this;
 
   options = options || {};
   var Player = this.constructor;
@@ -94,14 +104,6 @@ var offset = function offset(options) {
     }
 
     return Player.prototype.duration.apply(this, arguments);
-  };
-
-  this.currentTime = function (seconds) {
-    if (seconds !== undefined) {
-      return Player.prototype.currentTime.call(this, seconds + this._offsetStart) - this._offsetStart;
-    }
-
-    return Player.prototype.currentTime.apply(this, arguments) - this._offsetStart;
   };
 
   this.currentTime = function (seconds) {
@@ -148,16 +150,15 @@ var offset = function offset(options) {
   };
 
   this.disposeOffset = function () {
-    _this2.off('timeupdate', onPlayerTimeUpdate);
+    _this.off('timeupdate', onPlayerTimeUpdate);
   };
 
   this.ready(function () {
-    onPlayerReady(_this2, videojs.mergeOptions(defaults, options));
+    onPlayerReady(_this, videojs.mergeOptions(defaults, options));
   });
   this.one('dispose', this.disposeOffset);
-};
+}; // Register the plugin with video.js.
 
-console.log('trying to register the offset plugin'); // Register the plugin with video.js.
 
 registerPlugin('offset', offset); // Include the version number.
 

@@ -1,5 +1,6 @@
 import videojs from 'video.js';
 import { version as VERSION } from '../package.json';
+import { timeAlmostEqual } from './utils';
 
 // Default options for the plugin.
 const defaults = {};
@@ -17,21 +18,20 @@ const registerPlugin = videojs.registerPlugin || videojs.plugin;
 const onPlayerTimeUpdate = function() {
   const curr = this.currentTime();
 
+  if (timeAlmostEqual(curr, 0)) {
+    return;
+  }
+
   if (curr < 0) {
     this.currentTime(0);
-    this.play();
   }
-  if (this._offsetEnd > 0 && curr > this._offsetEnd - this._offsetStart) {
-    this.pause();
-    this.trigger('ended');
 
-    // Re-bind to timeupdate next time the video plays
-    this.one('play', () => {
-      this.on('timeupdate', onPlayerTimeUpdate);
-    });
+  if (this._offsetEnd > 0 && curr > this._offsetEnd - this._offsetStart) {
+    this.trigger('ended');
 
     if (!this._restartBeginning) {
       this.currentTime(this._offsetEnd - this._offsetStart);
+      this.pause();
     } else {
       this.trigger('loadstart');
       this.currentTime(0);

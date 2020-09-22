@@ -102,7 +102,9 @@ const offset = function(options) {
     }
 
     if (this._offsetStart !== undefined) {
-      return Player.prototype.currentTime.apply(this) - this._offsetStart;
+      const t = Player.prototype.currentTime.apply(this) - this._offsetStart;
+      this.getCache().currentTime = t;
+      return t;
     }
     return Player.prototype.currentTime.apply(this);
   };

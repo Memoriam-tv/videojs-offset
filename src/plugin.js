@@ -77,7 +77,7 @@ const offset = function(options) {
   this._offsetStart = parseFloat(options.start || '0');
   this._offsetEnd = parseFloat(options.end || '0');
   this._restartBeginning = options.restart_beginning || false;
-  
+
   this.currentTime(0);
   this.getCache().initTime = 0;
 
@@ -106,6 +106,7 @@ const offset = function(options) {
 
     if (this._offsetStart !== undefined) {
       const t = Player.prototype.currentTime.apply(this) - this._offsetStart;
+
       this.getCache().currentTime = t;
       return t;
     }

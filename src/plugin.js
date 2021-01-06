@@ -94,23 +94,33 @@ const offset = function offset(incomingOptions) {
   };
 
   this.currentTime = function(seconds) {
-    if (seconds !== undefined) {
-      if (this._offsetStart !== undefined) {
-        return Player.prototype.currentTime.call(
-          this,
-          seconds + this._offsetStart
-        );
+    try {
+      if (seconds !== undefined) {
+        if (this._offsetStart !== undefined) {
+          return Player.prototype.currentTime.call(
+            this,
+            seconds + this._offsetStart
+          );
+        }
+        return Player.prototype.currentTime.call(this, seconds);
       }
-      return Player.prototype.currentTime.call(this, seconds);
-    }
 
-    if (this._offsetStart !== undefined) {
-      const t = Player.prototype.currentTime.apply(this) - this._offsetStart;
+      if (this._offsetStart !== undefined) {
+        const t = Player.prototype.currentTime.apply(this) - this._offsetStart;
 
-      this.getCache().currentTime = t;
-      return t;
+        this.getCache().currentTime = t;
+        return t;
+      }
+      return Player.prototype.currentTime.apply(this);
+    } catch (e) {
+      // Try to handle TypeError: Cannot read property 'currentTime' of null
+      // Can't find the reason but it's only affecting 1 user which emits 5K+ events.....
+      if (e instanceof TypeError) {
+        // eslint-disable-next-line no-restricted-globals
+        window.location.reload();
+      }
+      throw e;
     }
-    return Player.prototype.currentTime.apply(this);
   };
 
   this.remainingTime = function() {

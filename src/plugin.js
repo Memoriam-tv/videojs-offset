@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import videojs from 'video.js';
 import { version as VERSION } from '../package.json';
 import { timeAlmostEqual } from './utils';
@@ -15,7 +16,7 @@ const registerPlugin = videojs.registerPlugin || videojs.plugin;
  * @function onPlayerTimeUpdate
  *
  */
-const onPlayerTimeUpdate = function() {
+const onPlayerTimeUpdate = function onPlayerTimeUpdate() {
   const curr = this.currentTime();
 
   if (timeAlmostEqual(curr, 0)) {
@@ -25,8 +26,7 @@ const onPlayerTimeUpdate = function() {
   if (curr < 0) {
     this.currentTime(0);
   }
-
-  if (this._offsetEnd > 0 && curr > this._offsetEnd - this._offsetStart) {
+  if (this._offsetEnd > 0 && curr > (this._offsetEnd - this._offsetStart)) {
     this.trigger('ended');
 
     if (!this._restartBeginning) {
@@ -70,8 +70,8 @@ const onPlayerReady = (player, options) => {
  * @param    {Object} [options={}]
  *           An object of options left to the plugin author to define.
  */
-const offset = function(options) {
-  options = options || {};
+const offset = function offset(incomingOptions) {
+  const options = incomingOptions || {};
   const Player = this.constructor;
 
   this._offsetStart = parseFloat(options.start || '0');
